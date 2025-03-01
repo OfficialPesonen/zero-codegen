@@ -51,13 +51,32 @@ export async function getColumns(pool: Pool): Promise<Column[]> {
   return result.rows;
 }
 
-// TODO: Support all data types
 export function columnDataTypeToZeroType(dataType: string) {
   switch (dataType) {
     case "text":
+    case "character varying":
+    case "varchar":
+    case "char":
+    case "character":
+    case "uuid":
+    case "xml":
       return "string";
     case "integer":
+    case "int":
+    case "bigint":
+    case "smallint":
     case "numeric":
+    case "decimal":
+    case "real":
+    case "double precision":
+    case "float":
+    case "timestamp":
+    case "timestamp with time zone":
+    case "timestamp without time zone":
+    case "date":
+    case "time":
+    case "time with time zone":
+    case "time without time zone":
       return "number";
     case "boolean":
       return "boolean";

@@ -14,3 +14,9 @@ At the moment you need to manually clone the repository to run the tool. I'll pu
 2. Create `.env.local` file based on `.env.example` file.
 3. Run `yarn start`
 
+## TODO
+
+- Find a better way to name relationships when a table has multiple foreign keys referencing the same table.
+- Only import tables and zero data types that are actually used in the generated code.
+- Support JSON and JSONB data types.
+- Support enums.
