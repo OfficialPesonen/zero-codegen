@@ -11,13 +11,10 @@ import { Pool } from "pg";
 import { Project, VariableDeclarationKind } from "ts-morph";
 import { ZeroColumn, ZeroRelationship } from "./types";
 
-// Create schema for each table
-// Create a relationships for each table if it has a foreign key
-
 async function run() {
   // Get columns from database
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  const columns = await getColumns(pool); // TODO: Handle cases where there is duplicate column names (for example if the column is unique and foreign key)
+  const columns = await getColumns(pool);
   await pool.end();
 
   // Initialize ts-morph project
@@ -30,11 +27,12 @@ async function run() {
   >((acc, column) => {
     // Add table to accumulator if it doesn't exist
     if (!acc[column.table_name]) {
-      acc[column.table_name] = {
-        primaryKey: "",
-        columns: [],
-        relationships: [],
-      };
+      acc[column.table_name] = { primaryKey: "", columns: [], relationships: [] };
+    }
+
+    // Add foreign table to accumulator if it doesn't exist
+    if (!acc[column.foreign_table_name]) {
+      acc[column.foreign_table_name] = { primaryKey: "", columns: [], relationships: [] };
     }
 
     acc[column.table_name].columns.push({
@@ -66,12 +64,20 @@ async function run() {
       acc[column.table_name].relationships.push({
         name:
           relationshipsWithSameForeignKeyTable.length >= 1
-            ? `${column.foreign_table_name}_${relationshipsWithSameForeignKeyTable.length}`
+            ? `${column.foreign_table_name}_${relationshipsWithSameForeignKeyTable.length}` // TODO: Find a better way to name relationships
             : column.foreign_table_name,
         type: isForeignKeyPrimaryKey ? "one" : "many",
         sourceField: [column.column_name],
         destSchema: column.foreign_table_name,
         destField: [column.foreign_column_name],
+      });
+
+      acc[column.foreign_table_name].relationships.push({
+        name: column.table_name,
+        type: isForeignKeyUnique ? "one" : "many",
+        sourceField: [column.foreign_column_name],
+        destSchema: column.table_name,
+        destField: [column.column_name],
       });
     }
 
@@ -130,4 +136,4 @@ async function run() {
   await project.save();
 }
 
-run();
+run().then(() => console.log("Zero schema generated"));
