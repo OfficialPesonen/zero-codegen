@@ -1,0 +1,19 @@
+{
+  "name": "zero-codegen",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx --env-file=.env.local src/index.ts"
+  },
+  "dependencies": {
+    "pg": "^8.13.3",
+    "ts-morph": "^25.0.1"
+  },
+  "devDependencies": {
+    "@rocicorp/zero": "^0.16.2025022800",
+    "@types/pg": "^8.11.11",
+    "prettier": "^3.5.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
