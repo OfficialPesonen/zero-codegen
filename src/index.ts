@@ -31,7 +31,7 @@ async function run() {
     }
 
     // Add foreign table to accumulator if it doesn't exist
-    if (!acc[column.foreign_table_name]) {
+    if (column.foreign_table_name && !acc[column.foreign_table_name]) {
       acc[column.foreign_table_name] = { primaryKey: "", columns: [], relationships: [] };
     }
 
@@ -57,28 +57,31 @@ async function run() {
 
       const isForeignKeyPrimaryKey = isPrimaryKeyColumn(foreignColumn);
       const isForeignKeyUnique = isUniqueKeyColumn(foreignColumn);
-      const relationshipsWithSameForeignKeyTable = acc[column.table_name].relationships.filter(
+      /*const relationshipsWithSameForeignKeyTable = acc[column.table_name].relationships.filter(
         ({ destSchema }) => destSchema === column.foreign_table_name
-      );
+      );*/
 
       acc[column.table_name].relationships.push({
-        name:
+        name: `${column.foreign_table_name}_${column.column_name}`,
+        /*name:
           relationshipsWithSameForeignKeyTable.length >= 1
-            ? `${column.foreign_table_name}_${relationshipsWithSameForeignKeyTable.length}` // TODO: Find a better way to name relationships
-            : column.foreign_table_name,
+            ? `${column.foreign_table_name}_${column.column_name}`
+            : column.foreign_table_name,*/
         type: isForeignKeyPrimaryKey ? "one" : "many",
         sourceField: [column.column_name],
         destSchema: column.foreign_table_name,
         destField: [column.foreign_column_name],
       });
 
-      acc[column.foreign_table_name].relationships.push({
-        name: column.table_name,
-        type: isForeignKeyUnique ? "one" : "many",
-        sourceField: [column.foreign_column_name],
-        destSchema: column.table_name,
-        destField: [column.column_name],
-      });
+      if (acc[column.foreign_table_name].relationships.find(({ name }) => name === column.table_name)) {
+        acc[column.foreign_table_name].relationships.push({
+          name: column.table_name,
+          type: isForeignKeyUnique ? "one" : "many",
+          sourceField: [column.foreign_column_name],
+          destSchema: column.table_name,
+          destField: [column.column_name],
+        });
+      }
     }
 
     return acc;
