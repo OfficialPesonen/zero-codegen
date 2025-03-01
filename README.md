@@ -3,7 +3,7 @@
 Zero Codegen is a tool that generates table and relationship definitions for [Zero](https://zero.rocicorp.dev/)  based
 on your existing Postgres database.
 
-DISCLAIMER: DISCLAIMER: Zero Codegen is under heavy development and may not function as expected. I'm currently updating
+DISCLAIMER: Zero Codegen is under heavy development and may not function as expected. I'm currently updating
 this project when I encounter issues in my own work.
 
 ## How to use
