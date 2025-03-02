@@ -8,16 +8,14 @@ this project when I encounter issues in my own work.
 
 ## How to use
 
-At the moment you need to manually clone the repository to run the tool. I'll publish it to NPM in the near future.
-
-1. Install node modules `yarn install`
-2. Create `.env.local` file based on `.env.example` file.
-3. Run `yarn start`
+1. Find your Postgres database connection string.
+2. Run `zero-codegen --database-url <connection-string>`
+3. Optionally, you can specify the file path to the tables and relationships files with `--tables-path` and
+   `--relationships-path` parameters.
 
 ## TODO
 
 - Find a better way to name relationships when a table has multiple foreign keys referencing the same table.
-- Publish to NPM.
 - Only import tables and zero data types that are actually used in the generated code.
 - Support JSON and JSONB data types.
 - Support enums.
