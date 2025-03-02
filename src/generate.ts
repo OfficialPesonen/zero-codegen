@@ -11,16 +11,28 @@ import { Pool } from "pg";
 import { Project, VariableDeclarationKind } from "ts-morph";
 import { ZeroColumn, ZeroRelationship } from "./types";
 
-async function run() {
+export async function generate({
+  databaseUrl,
+  tablesPath,
+  relationshipsPath,
+}: {
+  databaseUrl: string;
+  tablesPath?: string;
+  relationshipsPath?: string;
+}) {
   // Get columns from database
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const pool = new Pool({ connectionString: databaseUrl });
   const columns = await getColumns(pool);
   await pool.end();
 
   // Initialize ts-morph project
   const project = new Project();
-  const tablesFile = project.createSourceFile("tables.ts", {}, { overwrite: true });
-  const relationshipsFile = project.createSourceFile("relationships.ts", {}, { overwrite: true });
+  const tablesFile = project.createSourceFile(tablesPath ?? "./tables.ts", {}, { overwrite: true });
+  const relationshipsFile = project.createSourceFile(
+    relationshipsPath ?? "./relationships.ts",
+    {},
+    { overwrite: true }
+  );
 
   const tables = columns.reduce<
     Record<string, { primaryKey: string; columns: ZeroColumn[]; relationships: ZeroRelationship[] }>
@@ -137,5 +149,3 @@ async function run() {
 
   await project.save();
 }
-
-run().then(() => console.log("Zero schema generated"));
