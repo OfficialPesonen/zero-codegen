@@ -3,9 +3,8 @@
   "version": "0.0.1",
   "license": "MIT",
   "bin": {
-    "typedoctor": "./dist/index.js"
+    "typedoctor": "./dist/cli.js"
   },
-  "exports": "./dist/generate.js",
   "files": [
     "dist"
   ],
