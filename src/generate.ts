@@ -111,7 +111,7 @@ export async function generate({
   // Add import statements to tables file
   tablesFile.addImportDeclaration({
     moduleSpecifier: "@rocicorp/zero",
-    namedImports: ["boolean", "number", "string", "table"], // TODO: Add only required imports
+    namedImports: ["boolean", "number", "string", "json", "table"], // TODO: Add only required imports
   });
 
   // Add table definitions to tables file

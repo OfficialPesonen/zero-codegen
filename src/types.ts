@@ -12,9 +12,11 @@ export interface Column {
   foreign_column_name: string;
 }
 
+export type ZeroColumnType = "string" | "number" | "boolean" | "json";
+
 export interface ZeroColumn {
   name: string;
-  type: "string" | "number" | "boolean";
+  type: ZeroColumnType;
   isOptional: boolean;
 }
 

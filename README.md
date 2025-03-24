@@ -10,7 +10,7 @@ this project when I encounter issues in my own work.
 
 1. Install with `yarn add zero-codegen` or `npm install zero-codegen`
 2. Find your Postgres database connection string.
-3. Run `zero-codegen --database-url <connection-string>`
+3. Run `zero-codegen --database-url <connection-string>`. You can also use the `DATABASE_URL` environment variable.
 4. Optionally, you can specify the file path to the tables and relationships files with `--tables-path` and
    `--relationships-path` parameters.
 

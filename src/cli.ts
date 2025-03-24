@@ -2,6 +2,10 @@
 
 import { Command } from "commander";
 import { generate } from "./generate";
+import { config } from "dotenv";
+
+const envPaths = [".env", ".env.local"];
+envPaths.forEach((path) => config({ path: path, override: true }));
 
 const program = new Command();
 
@@ -19,7 +23,7 @@ program
 const options = program.opts();
 
 generate({
-  databaseUrl: options.databaseUrl,
+  databaseUrl: options.databaseUrl ?? process.env["DATABASE_URL"],
   tablesPath: options.tablesPath,
   relationshipsPath: options.relationshipsPath,
   forceGenerate: !!options.force,
