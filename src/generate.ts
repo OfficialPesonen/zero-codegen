@@ -13,12 +13,14 @@ import { ZeroColumn, ZeroRelationship } from "./types";
 
 export async function generate({
   databaseUrl,
-  tablesPath,
-  relationshipsPath,
+  tablesPath = "./tables.ts",
+  relationshipsPath = "./relationships.ts",
+  forceGenerate,
 }: {
   databaseUrl: string;
   tablesPath?: string;
   relationshipsPath?: string;
+  forceGenerate?: boolean;
 }) {
   // Get columns from database
   const pool = new Pool({ connectionString: databaseUrl });
@@ -27,16 +29,25 @@ export async function generate({
 
   // Initialize ts-morph project
   const project = new Project();
-  const tablesFile = project.createSourceFile(tablesPath ?? "./tables.ts", {}, { overwrite: true });
-  const relationshipsFile = project.createSourceFile(
-    relationshipsPath ?? "./relationships.ts",
-    {},
-    { overwrite: true }
-  );
+  let tablesFile = project.addSourceFileAtPathIfExists(tablesPath);
+  let relationshipsFile = project.addSourceFileAtPathIfExists(relationshipsPath);
+
+  // Create tables file if it doesn't exist or forceGenerate is true
+  if (!tablesFile || forceGenerate) {
+    tablesFile = project.createSourceFile(tablesPath, {}, { overwrite: true });
+  }
+
+  // Create relationships file if it doesn't exist or forceGenerate is true
+  if (!relationshipsFile || forceGenerate) {
+    relationshipsFile = project.createSourceFile(relationshipsPath, {}, { overwrite: true });
+  }
 
   const tables = columns.reduce<
     Record<string, { primaryKey: string; columns: ZeroColumn[]; relationships: ZeroRelationship[] }>
   >((acc, column) => {
+    const isPrimaryKey = isPrimaryKeyColumn(column);
+    const isForeignKey = isForeignKeyColumn(column);
+
     // Add table to accumulator if it doesn't exist
     if (!acc[column.table_name]) {
       acc[column.table_name] = { primaryKey: "", columns: [], relationships: [] };
@@ -47,18 +58,16 @@ export async function generate({
       acc[column.foreign_table_name] = { primaryKey: "", columns: [], relationships: [] };
     }
 
+    if (isPrimaryKey) {
+      acc[column.table_name].primaryKey = column.column_name;
+    }
+
+    // TODO: CHECK IF COLUMN EXISTS IN TABLE
     acc[column.table_name].columns.push({
       name: column.column_name,
       isOptional: column.is_nullable === "YES",
       type: columnDataTypeToZeroType(column.data_type),
     });
-
-    const isPrimaryKey = isPrimaryKeyColumn(column);
-    const isForeignKey = isForeignKeyColumn(column);
-
-    if (isPrimaryKey) {
-      acc[column.table_name].primaryKey = column.column_name;
-    }
 
     if (isForeignKey) {
       const foreignColumn = columns.find(
@@ -73,6 +82,7 @@ export async function generate({
         ({ destSchema }) => destSchema === column.foreign_table_name
       );
 
+      // TODO: CHECK IF RELATIONSHIP EXISTS IN TABLE, FIND A MATCH WITH SAME SOURCE FIELD, DEST SCHEMA AND DEST FIELD
       acc[column.table_name].relationships.push({
         name:
           relationshipsWithSameForeignKeyTable.length >= 1
@@ -101,7 +111,7 @@ export async function generate({
   // Add import statements to tables file
   tablesFile.addImportDeclaration({
     moduleSpecifier: "@rocicorp/zero",
-    namedImports: ["boolean", "number", "string", "table"], // TODO: Add only required imports
+    namedImports: ["boolean", "number", "string", "json", "table"], // TODO: Add only required imports
   });
 
   // Add table definitions to tables file

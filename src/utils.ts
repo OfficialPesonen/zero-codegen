@@ -1,4 +1,4 @@
-import { Column, ZeroColumn, ZeroRelationship } from "./types";
+import { Column, ZeroColumn, ZeroColumnType, ZeroRelationship } from "./types";
 import { Pool } from "pg";
 
 export async function getColumns(pool: Pool): Promise<Column[]> {
@@ -51,7 +51,7 @@ export async function getColumns(pool: Pool): Promise<Column[]> {
   return result.rows;
 }
 
-export function columnDataTypeToZeroType(dataType: string) {
+export function columnDataTypeToZeroType(dataType: string): ZeroColumnType {
   switch (dataType) {
     case "text":
     case "character varying":
@@ -80,6 +80,9 @@ export function columnDataTypeToZeroType(dataType: string) {
       return "number";
     case "boolean":
       return "boolean";
+    case "json":
+    case "jsonb":
+      return "json";
     default:
       return "string";
   }
